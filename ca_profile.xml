@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<CommunityApplications>
+  <Profile>Unraid templates for apps by antiremy.
+
+- **CacheParty**: a LAN game-download cache and drop-in replacement for lancachenet/monolithic, with a built-in dashboard.
+
+For help, open an issue on the app's GitHub repository.</Profile>
+  <Icon>https://raw.githubusercontent.com/antiremy/unraid-templates/main/images/cacheparty.png</Icon>
+  <WebPage>https://github.com/antiremy/unraid-templates</WebPage>
+  <Forum>https://github.com/antiremy/CacheParty/issues</Forum>
+</CommunityApplications>

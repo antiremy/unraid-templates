@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>CacheParty</Name>
+  <Repository>ghcr.io/antiremy/cacheparty:latest</Repository>
+  <Registry>https://github.com/antiremy/CacheParty/pkgs/container/cacheparty</Registry>
+  <Network>br0</Network>
+  <MyIP/>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/antiremy/CacheParty/issues</Support>
+  <Project>https://github.com/antiremy/CacheParty</Project>
+  <ReadMe>https://github.com/antiremy/CacheParty#readme</ReadMe>
+  <Overview>CacheParty is a LAN game-download cache: a single-binary, drop-in replacement for lancachenet/monolithic. It caches plain-HTTP downloads from Steam, Battle.net, Epic, Riot, Xbox/WSUS, PlayStation and everything else in uklans/cache-domains, so each game is downloaded from the internet once and then served to every PC on your network at LAN speed.
+
+It uses the same environment variables and access.log format as monolithic, and adds streaming request coalescing, adaptive read-ahead, an internet download speed limit, fast restarts and a built-in dashboard with live throughput and per-game, per-client traffic.
+
+Setup: give the container its own IP on br0 (ports 80 and 443 are taken by the Unraid web UI), then point lancache-dns, Pi-hole or AdGuard Home at that IP for the cache-domains lists. HTTPS (:443) is passed through, not cached. CacheParty cannot read an existing monolithic cache, so give it an empty cache folder.</Overview>
+  <Category>Network:Proxy Downloaders:</Category>
+  <WebUI>http://[IP]:[PORT:8080]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/antiremy/unraid-templates/main/templates/cacheparty.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/antiremy/unraid-templates/main/images/cacheparty.png</Icon>
+  <Screenshot>https://raw.githubusercontent.com/antiremy/CacheParty/main/docs/images/dashboard.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/antiremy/CacheParty/main/docs/images/dashboard-charts.png</Screenshot>
+  <License>MIT</License>
+  <ExtraSearchTerms>lancache monolithic steam battle.net epic game cache lan party</ExtraSearchTerms>
+  <Requires>A dedicated IP address for the container (br0 or another custom network), and a DNS server such as lancache-dns, Pi-hole or AdGuard Home that resolves the cache-domains hostnames to that IP.</Requires>
+  <Config Name="Cache" Target="/data/cache" Default="/mnt/user/cacheparty/" Mode="rw" Description="Cached chunks and their index. Put this on the disk or pool with the most space; use an empty folder, not an existing monolithic cache." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/cacheparty/</Config>
+  <Config Name="Appdata" Target="/data" Default="/mnt/user/appdata/cacheparty/" Mode="rw" Description="Logs, dashboard settings and stats, and the cache-domains checkout." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/cacheparty/</Config>
+  <Config Name="Cache size" Target="CACHE_DISK_SIZE" Default="1000g" Mode="" Description="Maximum total cache size, e.g. 500g or 2t. Can also be changed later from the dashboard." Type="Variable" Display="always" Required="true" Mask="false">1000g</Config>
+  <Config Name="Dashboard password" Target="DASHBOARD_PASSWORD" Default="" Mode="" Description="Lets you change settings, verify the cache and purge games from the dashboard. Leave empty for a read-only dashboard." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="Upstream DNS" Target="UPSTREAM_DNS" Default="8.8.8.8 8.8.4.4" Mode="" Description="Resolvers used to reach the real CDNs. Must not be the DNS server that points game domains at this cache." Type="Variable" Display="always" Required="true" Mask="false">8.8.8.8 8.8.4.4</Config>
+  <Config Name="Internet speed limit" Target="UPSTREAM_RATE_LIMIT" Default="0" Mode="" Description="Caps internet bandwidth used for cache misses, in bits/s (e.g. 500m, 1g). 0 is unlimited. Cache hits always run at full LAN speed." Type="Variable" Display="always" Required="false" Mask="false">0</Config>
+  <Config Name="Minimum free disk" Target="MIN_FREE_DISK" Default="10g" Mode="" Description="Evict old chunks to keep at least this much free space on the cache volume." Type="Variable" Display="advanced" Required="false" Mask="false">10g</Config>
+  <Config Name="Max age" Target="CACHE_MAX_AGE" Default="3560d" Mode="" Description="Evict chunks not accessed within this time." Type="Variable" Display="advanced" Required="false" Mask="false">3560d</Config>
+  <Config Name="Bypass domains" Target="BYPASS_DOMAINS" Default="" Mode="" Description="Comma-separated domains to pass through without caching, e.g. example.com, *.cdn.example.net" Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Max read-ahead fetches" Target="CACHE_MAX_PREFETCHES" Default="64" Mode="" Description="Chunk fetches allowed to run ahead of clients, across all clients. 0 disables read-ahead." Type="Variable" Display="advanced" Required="false" Mask="false">64</Config>
+  <Config Name="Slice size" Target="CACHE_SLICE_SIZE" Default="1m" Mode="" Description="Chunk size. Changing this makes everything already cached unreadable; leave it alone unless you are starting a fresh cache." Type="Variable" Display="advanced" Required="false" Mask="false">1m</Config>
+  <Config Name="Cache domains repo" Target="CACHE_DOMAINS_REPO" Default="https://github.com/uklans/cache-domains.git" Mode="" Description="Git repository for the list of domains to cache." Type="Variable" Display="advanced" Required="false" Mask="false">https://github.com/uklans/cache-domains.git</Config>
+  <Config Name="Cache domains branch" Target="CACHE_DOMAINS_BRANCH" Default="master" Mode="" Description="Branch of the cache-domains repository." Type="Variable" Display="advanced" Required="false" Mask="false">master</Config>
+  <Config Name="Skip domain update" Target="NOFETCH" Default="false" Mode="" Description="Set to true to skip updating cache-domains at startup." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Log format" Target="NGINX_LOG_FORMAT" Default="cachelog" Mode="" Description="access.log format: cachelog or cachelog-json." Type="Variable" Display="advanced" Required="false" Mask="false">cachelog</Config>
+  <Config Name="Go memory limit" Target="GOMEMLIMIT" Default="" Mode="" Description="If you set a container memory limit, set this a little below it (e.g. 900MiB for 1 GiB)." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="HTTP port" Target="80" Default="80" Mode="tcp" Description="Caching proxy. Clients must reach it on port 80, so use a dedicated IP (br0) rather than remapping it." Type="Port" Display="advanced" Required="true" Mask="false">80</Config>
+  <Config Name="HTTPS port" Target="443" Default="443" Mode="tcp" Description="HTTPS SNI passthrough (not cached)." Type="Port" Display="advanced" Required="true" Mask="false">443</Config>
+  <Config Name="Dashboard port" Target="8080" Default="8080" Mode="tcp" Description="Dashboard, /metrics and health check." Type="Port" Display="advanced" Required="true" Mask="false">8080</Config>
+</Container>
